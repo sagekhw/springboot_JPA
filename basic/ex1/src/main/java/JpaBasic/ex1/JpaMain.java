@@ -16,8 +16,8 @@ public class JpaMain {
 		//JPA
 		save(1L,"helloA");
 		save(2L,"helloB");
-		update(2L,"updateB");
-		delete(1L);
+//		update(2L,"updateB");
+//		delete(1L);
 
 		save(3L,"helloC");
 		save(4L,"helloD");
@@ -33,10 +33,20 @@ public class JpaMain {
 		EntityTransaction entityTransaction = entityManager.getTransaction();
 		entityTransaction.begin();
 		try{
+			// 비영속 상태
 			Member member = new Member();
 			member.setId(id);
 			member.setName(name);
-			entityManager.persist(member);
+
+			// 영속 상태
+			entityManager.persist(member); // save persistence context
+
+			// 영속 컨텍스트에서 분리, 준영속 상태
+			entityManager.detach(member); // just like class
+
+			// 객체를 삭제한 상태(삭제)
+			entityManager.remove(member); // save and remove
+
 
 			entityTransaction.commit();
 		}catch (Exception e){
@@ -58,7 +68,9 @@ public class JpaMain {
 			System.out.println("========== point A ==========");
 			member.setName(name);
 			System.out.println("========== point B ==========");
-			/* 명시적으로 수정을 위한 sql을 실행 하여도 커밋 전에 한번만 update 처리 된다. */
+			/*
+			명시적으로 수정을 위한 sql을 실행 하여도 커밋 전에 한번만 update 처리 된다.
+			*/
 //			entityManager.persist(member);
 			System.out.println("========== point C ==========");
 			/*
@@ -119,4 +131,15 @@ public class JpaMain {
 		}
 		entityManagerFactory.close();
 	}
+
+
+	/*
+		추가 설명 :
+			entityManager.persist(member); 는 DB에 수정 및 저장 하는 것이 아니라
+			member(entity)를 영속성 컨텍스트 라는 곳에 저장 한다.
+			- 영속성 컨텍스트(PersistenceContext)는 논리적인 개념.
+			- 눈에 보이지 않는다.
+			- Entity Manager를 통해서 영속성 컨텍스트에 접근.
+
+	 */
 }
